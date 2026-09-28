@@ -1,0 +1,18 @@
+{
+  "name": "小小成长电影 · 未来星际生日工坊",
+  "short_name": "生日工坊",
+  "description": "本机优先的儿童生日成长影片制作工具",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#ff7867",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

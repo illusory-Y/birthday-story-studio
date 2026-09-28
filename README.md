@@ -1,18 +1,30 @@
-# 小小成长电影
+# 小小成长电影 · 未来星际生日工坊
 
-手机和电脑都可以打开的生日成长影片编辑器。支持姓名、年龄、生日、主题、照片回忆、自动播放、蛋糕和烟花。
+本机优先的儿童生日成长影片制作工具。照片和项目数据默认保存在当前浏览器，不上传到云端。
+
+## 当前功能
+
+- 首页控制台、主题选择、故事编辑、剧场播放、导出中心
+- 6 个儿童未来主题：星际、糖果云、未来城市、海底、森林、恐龙
+- 姓名、年龄、生日、成长回忆和照片时间线
+- IndexedDB 本地照片保存
+- .birthday 本地项目备份文件导入/导出
+- PWA manifest 和 Service Worker 离线基础
+- GitHub Pages 静态发布
 
 ## 本地运行
 
-```bash
 npm install
 npm run dev
-```
 
-## 发布到 GitHub Pages
+## 发布
 
-本仓库的 `main/docs` 存放已编译的网站。在仓库的 Settings → Pages → Build and deployment 中选择 **Deploy from a branch**、`main`、`/docs`，然后保存。
+生产文件位于 docs。GitHub Pages 选择 main 分支的 /docs 目录即可。
 
-改动源代码后，运行 `npm run build`，再将 `dist` 中的全部内容复制到 `docs` 并提交。`vite.config.js` 使用相对路径，适配仓库子路径。
+修改源码后执行 npm run build，再将 dist 的内容同步到 docs 后提交。
 
-编辑内容和上传照片只保存在当前浏览器（Local Storage / IndexedDB）。其他人打开公开网址不会看到这些本地照片；公开仓库也不应放入未获授权的儿童照片。要分享完整影片，需要另外设计照片的发布方式。
+## 后续模块
+
+视频导出会采用本机 Canvas/MediaRecorder；APK 会使用 Capacitor 封装；投屏会先提供全屏剧场模式，再扩展设备投屏。
+
+公开仓库不应放入儿童真实照片。当前浏览器上传的照片只保存在本机项目数据中。
