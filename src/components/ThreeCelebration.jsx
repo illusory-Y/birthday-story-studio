@@ -264,7 +264,7 @@ export default function ThreeCelebration({ mode = 'ambient', theme = 'starlit', 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.type = THREE.PCFShadowMap
     renderer.setClearColor(0x000000, 0)
     renderer.domElement.className = 'three-celebration-canvas'
     renderer.domElement.setAttribute('aria-hidden', 'true')
