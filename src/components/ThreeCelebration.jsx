@@ -64,62 +64,85 @@ function addRing(scene, radius, color, rotation, opacity = 0.36) {
 
 function addCake(scene, palette, candlesOut) {
   const group = new THREE.Group()
-  group.position.set(0, -0.82, 0)
-  group.rotation.y = -0.25
+  group.position.set(0, -0.96, 0)
+  group.rotation.y = -0.22
   scene.add(group)
+  const physical = (color, options = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: options.roughness ?? 0.32, metalness: options.metalness ?? 0.02, clearcoat: options.clearcoat ?? 0.28, clearcoatRoughness: options.clearcoatRoughness ?? 0.22, emissive: options.emissive ?? 0x000000, emissiveIntensity: options.emissiveIntensity ?? 0, transparent: options.transparent ?? false, opacity: options.opacity ?? 1 })
+  const mark = (mesh, cast = true, receive = true) => { mesh.castShadow = cast; mesh.receiveShadow = receive; group.add(mesh); return mesh }
+  const lathe = (points, material) => mark(new THREE.Mesh(new THREE.LatheGeometry(points.map(([radius, y]) => new THREE.Vector2(radius, y)), 96), material))
 
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(1.62, 1.72, 0.12, 64), makeMaterial(0xfaf1d2, { roughness: 0.24, metalness: 0.12 }))
-  plate.position.y = -0.06
-  group.add(plate)
-  const plateRing = new THREE.Mesh(new THREE.TorusGeometry(1.53, 0.045, 10, 64), makeMaterial(palette.secondary, { emissive: palette.secondary, emissiveIntensity: 0.35 }))
-  plateRing.rotation.x = Math.PI / 2
-  plateRing.position.y = 0.01
-  group.add(plateRing)
+  const plate = mark(new THREE.Mesh(new THREE.CylinderGeometry(1.72, 1.84, 0.12, 96), physical(0xfaf4e7, { roughness: 0.18, metalness: 0.16, clearcoat: 0.55 })), false, true)
+  plate.position.y = -0.09
+  const plateEdge = mark(new THREE.Mesh(new THREE.TorusGeometry(1.66, 0.055, 12, 96), physical(palette.secondary, { emissive: palette.secondary, emissiveIntensity: 0.48, metalness: 0.25 })))
+  plateEdge.rotation.x = Math.PI / 2
+  plateEdge.position.y = -0.01
 
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.36, 1.43, 0.84, 64), makeMaterial(palette.primary, { roughness: 0.3 }))
-  base.position.y = 0.42
-  group.add(base)
-  const baseBand = new THREE.Mesh(new THREE.TorusGeometry(1.37, 0.055, 10, 64), makeMaterial(palette.gold, { emissive: palette.gold, emissiveIntensity: 0.25 }))
-  baseBand.rotation.x = Math.PI / 2
-  baseBand.position.y = 0.4
-  group.add(baseBand)
+  const bottom = lathe([[0, 0], [1.18, 0], [1.34, 0.1], [1.38, 0.24], [1.38, 0.7], [1.34, 0.84], [1.22, 0.9], [0, 0.9]], physical(palette.primary, { roughness: 0.3, clearcoat: 0.4 }))
+  bottom.position.y = 0.02
+  const bottomBand = mark(new THREE.Mesh(new THREE.TorusGeometry(1.365, 0.052, 12, 96), physical(palette.gold, { emissive: palette.gold, emissiveIntensity: 0.35, metalness: 0.28 })))
+  bottomBand.rotation.x = Math.PI / 2
+  bottomBand.position.y = 0.37
 
-  const frosting = new THREE.Mesh(new THREE.CylinderGeometry(1.28, 1.36, 0.18, 64), makeMaterial(0xfff4d5, { roughness: 0.24 }))
-  frosting.position.y = 0.88
-  group.add(frosting)
-  for (let index = 0; index < 11; index += 1) {
-    const angle = index / 11 * Math.PI * 2
-    const dollop = new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 12), makeMaterial(index % 2 ? palette.gold : 0xfff1c8, { roughness: 0.2 }))
-    dollop.scale.set(1, 0.65, 1)
-    dollop.position.set(Math.cos(angle) * 1.02, 1.03, Math.sin(angle) * 1.02)
-    group.add(dollop)
+  const cream = 0xfff6df
+  const bottomIcing = lathe([[0, 0], [1.2, 0], [1.31, 0.08], [1.31, 0.19], [1.22, 0.27], [1.08, 0.22], [0.94, 0.28], [0.78, 0.21], [0.6, 0.27], [0.42, 0.22], [0.22, 0.27], [0, 0.25]], physical(cream, { roughness: 0.2, clearcoat: 0.46 }))
+  bottomIcing.position.y = 0.77
+
+  const top = lathe([[0, 0], [0.7, 0], [0.83, 0.1], [0.88, 0.22], [0.88, 0.66], [0.82, 0.75], [0.72, 0.8], [0, 0.8]], physical(palette.secondary, { roughness: 0.3, clearcoat: 0.4 }))
+  top.position.y = 0.91
+  const topIcing = lathe([[0, 0], [0.72, 0], [0.82, 0.08], [0.82, 0.18], [0.75, 0.27], [0.63, 0.21], [0.5, 0.3], [0.36, 0.2], [0.22, 0.28], [0, 0.25]], physical(cream, { roughness: 0.18, clearcoat: 0.5 }))
+  topIcing.position.y = 1.56
+
+  const topBand = mark(new THREE.Mesh(new THREE.TorusGeometry(0.84, 0.035, 10, 64), physical(palette.gold, { emissive: palette.gold, emissiveIntensity: 0.3, metalness: 0.24 })))
+  topBand.rotation.x = Math.PI / 2
+  topBand.position.y = 1.2
+
+  const berryMaterial = physical(palette.primary, { roughness: 0.2, clearcoat: 0.58 })
+  const berryAlt = physical(palette.gold, { roughness: 0.2, clearcoat: 0.58 })
+  for (let index = 0; index < 10; index += 1) {
+    const angle = index / 10 * Math.PI * 2 + 0.12
+    const radius = index % 2 ? 1.03 : 0.74
+    const berry = mark(new THREE.Mesh(new THREE.SphereGeometry(index % 3 ? 0.09 : 0.12, 20, 16), index % 2 ? berryMaterial : berryAlt))
+    berry.scale.y = 0.72
+    berry.position.set(Math.cos(angle) * radius, index % 2 ? 0.99 : 1.64, Math.sin(angle) * radius)
   }
-  const center = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), makeMaterial(palette.secondary, { emissive: palette.secondary, emissiveIntensity: 0.28 }))
+  const center = mark(new THREE.Mesh(new THREE.SphereGeometry(0.22, 28, 20), physical(palette.primary, { emissive: palette.primary, emissiveIntensity: 0.18, clearcoat: 0.68 })))
   center.scale.y = 0.62
-  center.position.y = 1.11
-  group.add(center)
+  center.position.y = 1.83
+  const centerLeaf = mark(new THREE.Mesh(new THREE.SphereGeometry(0.12, 18, 12), physical(palette.secondary, { roughness: 0.25 })))
+  centerLeaf.scale.set(1.7, 0.22, 0.55)
+  centerLeaf.position.set(0.13, 1.98, 0.02)
+  centerLeaf.rotation.z = -0.35
 
   const count = Math.min(12, Math.max(1, Number(candlesOut?.age || 6)))
   const actualCount = Math.min(9, Math.max(3, count))
   for (let index = 0; index < actualCount; index += 1) {
     const angle = index / actualCount * Math.PI * 2 + 0.18
-    const radius = index % 2 ? 0.66 : 0.38
+    const radius = index % 2 ? 0.58 : 0.3
     const candleGroup = new THREE.Group()
-    candleGroup.position.set(Math.cos(angle) * radius, 1.18, Math.sin(angle) * radius)
-    const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.58, 16), makeMaterial(index % 2 ? palette.secondary : palette.primary, { roughness: 0.3 }))
-    candle.position.y = 0.29
+    candleGroup.position.set(Math.cos(angle) * radius, 1.78, Math.sin(angle) * radius)
+    candleGroup.rotation.z = Math.sin(index * 1.8) * 0.06
+    const candleMaterial = physical(index % 2 ? palette.secondary : palette.primary, { roughness: 0.25, clearcoat: 0.35 })
+    const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.06, 0.64, 24), candleMaterial)
+    candle.position.y = 0.32
+    candle.castShadow = true
     candleGroup.add(candle)
-    const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.056, 0.012, 6, 16), makeMaterial(palette.gold, { emissive: palette.gold, emissiveIntensity: 0.3 }))
-    stripe.rotation.x = Math.PI / 2
-    stripe.position.y = 0.24
-    candleGroup.add(stripe)
-    const flame = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 10), makeMaterial(palette.gold, { emissive: palette.gold, emissiveIntensity: 2.4, roughness: 0.1, transparent: true, opacity: candlesOut.active ? 0 : 1 }))
-    flame.scale.set(0.65, 1.45, 0.65)
-    flame.position.y = 0.68
+    for (let stripeIndex = 0; stripeIndex < 3; stripeIndex += 1) {
+      const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.057, 0.012, 8, 24), physical(palette.gold, { emissive: palette.gold, emissiveIntensity: 0.28, metalness: 0.2 }))
+      stripe.rotation.x = Math.PI / 2
+      stripe.position.y = 0.15 + stripeIndex * 0.18
+      stripe.castShadow = true
+      candleGroup.add(stripe)
+    }
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.08, 8), physical(0x3e2f2c, { roughness: 0.8 }))
+    wick.position.y = 0.68
+    candleGroup.add(wick)
+    const flame = new THREE.Mesh(new THREE.SphereGeometry(0.105, 18, 14), physical(palette.gold, { emissive: palette.gold, emissiveIntensity: 2.8, roughness: 0.06, transparent: true, opacity: candlesOut.active ? 0 : 1 }))
+    flame.scale.set(0.58, 1.5, 0.58)
+    flame.position.y = 0.79
     flame.userData.isFlame = true
     candleGroup.add(flame)
-    const flameLight = new THREE.PointLight(palette.gold, candlesOut.active ? 0 : 0.55, 1.6)
-    flameLight.position.y = 0.67
+    const flameLight = new THREE.PointLight(palette.gold, candlesOut.active ? 0 : 0.6, 1.8)
+    flameLight.position.y = 0.78
     flameLight.userData.isFlameLight = true
     candleGroup.add(flameLight)
     candleGroup.userData.candleIndex = index
@@ -240,6 +263,8 @@ export default function ThreeCelebration({ mode = 'ambient', theme = 'starlit', 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setClearColor(0x000000, 0)
     renderer.domElement.className = 'three-celebration-canvas'
     renderer.domElement.setAttribute('aria-hidden', 'true')
@@ -254,6 +279,10 @@ export default function ThreeCelebration({ mode = 'ambient', theme = 'starlit', 
     scene.add(ambientLight)
     const keyLight = new THREE.PointLight(palette.gold, 3.2, 9)
     keyLight.position.set(1.9, 3.1, 3.2)
+    keyLight.castShadow = true
+    keyLight.shadow.mapSize.set(1024, 1024)
+    keyLight.shadow.camera.near = 0.1
+    keyLight.shadow.camera.far = 18
     scene.add(keyLight)
     const rimLight = new THREE.PointLight(palette.secondary, 2.5, 8)
     rimLight.position.set(-3.1, 0.3, 1.5)
